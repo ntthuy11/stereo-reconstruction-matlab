@@ -4,27 +4,12 @@ close all;
 %warning off;
 
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DEFINE PARAMETERS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DEFINE PARAMETERS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % 160408 CALIBRATION
 %load 'D:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\05-indoor,32canon\\160408 calibration(prepare to go to field)\\calib-MATLAB\\B15-B16.mat';
 
-% 160408 CALIBRATION
-%load 'D:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160613 CALIBRATION\\calib-MATLAB\\D25-D26.mat';
-%load 'D:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160613 CALIBRATION\\calib-MATLAB\\D27-D28.mat';
-
-% 160728 CALIBRATION
-%load 'F:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160728 CALIBRATION-arm by arm\\calib-MATLAB\\A07-A08.mat'; % load GOOD calibration files
-%load 'D:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160728 CALIBRATION-arm by arm\\calib-MATLAB\\B09-B10.mat';
-%load 'F:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160728 CALIBRATION-arm by arm\\calib-MATLAB\\B11-B12.mat';
-%load 'F:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160728 CALIBRATION-arm by arm\\calib-MATLAB\\C17-C18.mat';
-%load 'F:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160728 CALIBRATION-arm by arm\\calib-MATLAB\\C19-C20.mat';
-%load 'F:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160728 CALIBRATION-arm by arm\\calib-MATLAB\\C21-C22.mat';
-%load 'F:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160728 CALIBRATION-arm by arm\\calib-MATLAB\\C23-C24.mat';
-%load 'F:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160728 CALIBRATION-arm by arm\\calib-MATLAB\\D31-D32.mat';
-
-
-% ===== 160528 Prof St.Clair tomato =====
+% ===== 160528 data =====
 % IMG_PATH_TEMPLATE = 'F:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160528 Prof St.Clair tomato\\OURS\\images\\%s_img missing\\%04d.jpg';
 % 
 % %IMG_PATH_LEFT     = 'A01';        IMG_PATH_RIGHT = 'A02';
@@ -52,7 +37,6 @@ close all;
 
 % ===== 160602 sunflowers(22),no lights =====
 IMG_PATH_TEMPLATE = 'D:\\ThuyNguyen\\project\\03-stereo, Basler camera\\code\\160823 All-in-one\\build\\Release\\170301 test new lens 16mm\\matlab\\%s\\%04d.jpg';
-%IMG_PATH_TEMPLATE = 'D:\\ThuyNguyen\\project\\03-stereo, Basler camera\\data\\06-outdoor,32canon\\160602 sunflowers(22),no lights\\OURS\\images\\%s\\%04d.jpg';
 %IMG_PATH_LEFT     = 'B09';      IMG_PATH_RIGHT = 'B10';
 %IMG_PATH_LEFT     = 'B11';      IMG_PATH_RIGHT = 'B12';
 %IMG_PATH_LEFT     = 'B15';      IMG_PATH_RIGHT = 'B16';
@@ -118,12 +102,14 @@ for i = IMG_FROM : IMG_TO
     fprintf('Rectify %s(%02d) and %s(%02d) images ... ', IMG_PATH_LEFT, i, IMG_PATH_RIGHT, i);
     timeStart = cputime;
     [leftImgRectified, rightImgRectified] = rectifyStereoImages(leftImgRotated, rightImgRotated, stereoParams); % <---
-                                                                                               % stereoParams is a variable obtained from loading calib
+                                                            % stereoParams is a variable obtained from loading calib
     timeElapsed = cputime - timeStart;
     fprintf('%.03f s \n', timeElapsed);    
     
     if (SHOW_STEREO_ANAGLYPH) % show overlap (red and green) stereo image
-        figure('Name', 'Stereo anaglyph');     imshow(stereoAnaglyph(leftImgRectified, rightImgRectified));    title('Stereo anaglyph image');
+        figure('Name', 'Stereo anaglyph');
+        imshow(stereoAnaglyph(leftImgRectified, rightImgRectified));
+        title('Stereo anaglyph image');
     end
     
     
@@ -133,14 +119,14 @@ for i = IMG_FROM : IMG_TO
              N_DISPARITIES, MATCHING_WIN_SIZE, MATCHING_CONTRAST_THR, MATCHING_UNIQUENESS_THR, MATCHING_DIST_THR);
     timeStart = cputime;
     disparityMap = disparity(rgb2gray(leftImgRectified), rgb2gray(rightImgRectified), ...   % <---
-                             'Method',              'SemiGlobal',           ...
-                             'DisparityRange',      [0 N_DISPARITIES],      ...
-                             'BlockSize',           MATCHING_WIN_SIZE,      ...
-                             'ContrastThreshold',   MATCHING_CONTRAST_THR,  ... % 0 < thr <= 1. Increase -> fewer pixels being marked as unreliable
-                             'UniquenessThreshold', MATCHING_UNIQUENESS_THR,... % (0 to disable) non-neg integer defining min value of uniqueness. If a pixel is less unique,
-                                                                            ... %      the disparity computed for it is less reliable. Increase-> mark more pixels unreliable
-                             'DistanceThreshold',   MATCHING_DIST_THR);         % ([] to disable) non-neg integer defining max dist for left-right check. Increase-> fewer
-                                                                                %      pixels being marked as unreliable  
+     'Method',              'SemiGlobal',           ...
+     'DisparityRange',      [0 N_DISPARITIES],      ...
+     'BlockSize',           MATCHING_WIN_SIZE,      ...
+     'ContrastThreshold',   MATCHING_CONTRAST_THR,  ... % 0 < thr <= 1. Increase -> fewer pixels being marked as unreliable
+     'UniquenessThreshold', MATCHING_UNIQUENESS_THR,... % (0 to disable) non-neg integer defining min value of uniqueness. If a pixel is less unique,
+                                                    ... %      the disparity computed for it is less reliable. Increase-> mark more pixels unreliable
+     'DistanceThreshold',   MATCHING_DIST_THR);         % ([] to disable) non-neg integer defining max dist for left-right check. Increase-> fewer
+                                                        %      pixels being marked as unreliable  
     timeElapsed = cputime - timeStart;
     fprintf('%.03f s \n', timeElapsed);          
     
@@ -155,8 +141,8 @@ for i = IMG_FROM : IMG_TO
     fprintf('\n');
     fprintf('Generate point cloud based on disparity map ... ');
     timeStart = cputime;
-    xyzPoints = reconstructScene(disparityMap, stereoParams);           % <---
-    pointCloud3D = pointCloud(xyzPoints, 'Color', leftImgRectified);    % <--- convert points3D structure to pointCloud structure (with color) to process or save to file
+    xyzPoints = reconstructScene(disparityMap, stereoParams);        % <---
+    pointCloud3D = pointCloud(xyzPoints, 'Color', leftImgRectified); % <--- convert points3D structure to pointCloud structure (with color) to process or save to file
     timeElapsed = cputime - timeStart;
     fprintf('%.03f s \n', timeElapsed);
     
